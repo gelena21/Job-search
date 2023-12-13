@@ -1,5 +1,3 @@
-# classes_api.py
-
 import os
 from abc import ABC, abstractmethod
 
@@ -31,7 +29,8 @@ class HeadHunterAPI(AbstractAPI):
         Устанавливает базовый URL и заголовки для запросов к API HeadHunter.
         """
         self.base_url = "https://api.hh.ru/vacancies"
-        self.headers = {"User-Agent": "YourApp/1.0 (your@email.com)"}
+        self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                                     ' (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
 
     def get_vacancies(self, search_query):
         """

@@ -2,12 +2,18 @@ from src.classes_api import HeadHunterAPI, SuperJobAPI
 from src.savedvac import JSONSaver
 from src.vacancies import Vacancy
 from utils import filter_vacancies, get_top_vacancies, print_vacancies, sort_vacancies
+from dotenv import load_dotenv
+load_dotenv()
+
 
 def user_interaction():
     # Создание экземпляров классов для работы с API и вакансиями
     hh_api = HeadHunterAPI()
     superjob_api = SuperJobAPI()
     json_saver = JSONSaver("vacancies.json")
+
+    hh_api.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                                    ' (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
 
     # Получение вакансий с разных платформ
     hh_vacancies = hh_api.get_vacancies("Python")

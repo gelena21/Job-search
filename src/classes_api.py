@@ -28,7 +28,7 @@ class HeadHunterAPI(AbstractAPI):
         Конструктор класса HeadHunterAPI.
         Устанавливает базовый URL и заголовки для запросов к API HeadHunter.
         """
-        self.base_url = "https://api.hh.ru/vacancies"
+        self.base_url = 'https://api.hh.ru/vacancies'
         self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
                                      ' (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
 
@@ -42,7 +42,7 @@ class HeadHunterAPI(AbstractAPI):
         Returns:
         - list: Список вакансий.
         """
-        url = f"{self.base_url}/vacancies"
+        url = f"{self.base_url}"
         params = {"text": search_query}
         response = requests.get(url, headers=self.headers, params=params)
 
@@ -75,7 +75,7 @@ class SuperJobAPI(AbstractAPI):
         Returns:
         - list: Список вакансий.
         """
-        url = f"{self.base_url}/vacancies/"
+        url = f"{self.base_url}"
         params = {"keywords": search_query}
         response = requests.get(url, headers=self.headers, params=params)
 

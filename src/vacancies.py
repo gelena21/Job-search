@@ -15,16 +15,10 @@ class Vacancy:
         Returns:
         - int: Результат сравнения (-1, 0, 1).
         """
-        # Пример реализации сравнения зарплаты
         self_salary = self.extract_salary_value(self.salary)
         other_salary = self.extract_salary_value(other_vacancy.salary)
 
-        if self_salary < other_salary:
-            return -1
-        elif self_salary == other_salary:
-            return 0
-        else:
-            return 1
+        return (self_salary > other_salary) - (self_salary < other_salary)
 
     def validate_data(self):
         """
@@ -33,11 +27,7 @@ class Vacancy:
         Returns:
         - bool: True, если данные валидны, False в противном случае.
         """
-        # Пример реализации валидации
-        if not all([self.title, self.link, self.salary, self.description]):
-            return False
-
-        return True
+        return all([self.title, self.link, self.salary, self.description])
 
     def extract_salary_value(self, salary):
         """
@@ -49,7 +39,6 @@ class Vacancy:
         Returns:
         - int: Числовое значение зарплаты.
         """
-        # Пример реализации
         try:
             salary_values = [int(s) for s in salary.replace(" ", "").split("-")]
             return sum(salary_values) // len(salary_values)

@@ -46,28 +46,22 @@ def print_vacancies(vacancies):
 
 def filter_vacancies(vacancies, filter_words):
     """
-    Фильтрует вакансии по ключевым словам.
+    Фильтрует вакансии по заданным ключевым словам.
 
     Parameters:
-    - vacancies (List[dict]): Список словарей с данными о вакансиях.
-    - filter_words (List[str]): Список ключевых слов для фильтрации.
+    - vacancies (list): Список вакансий.
+    - filter_words (list): Ключевые слова.
 
     Returns:
-    - List[dict]: Отфильтрованный список вакансий.
+    - list: Список отфильтрованных вакансий.
     """
-    filtered_vacancies = []
 
+    filtered_vacancies = []
     for vacancy in vacancies:
-        if vacancy.get('salary') is not None:
-            description = vacancy.get('profession', '') + vacancy.get('candidat', '')
-            # Для вакансий от SuperJob
-            if any(word.lower() in description.lower() for word in filter_words):
+        for filter_word in filter_words:
+            if filter_word in vacancy.experience:
                 filtered_vacancies.append(vacancy)
-            # Для вакансий от HeadHunter
-            elif 'snippet' in vacancy and 'requirement' in vacancy['snippet'] and any(
-                    word.lower() in vacancy['snippet']['requirement'].lower() for word in filter_words):
-                filtered_vacancies.append(vacancy)
-        else:
-            print(f"Вакансия без указанной зарплаты: {vacancy}")
+                break
 
     return filtered_vacancies
+

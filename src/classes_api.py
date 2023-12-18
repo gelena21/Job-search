@@ -1,3 +1,5 @@
+import os
+
 from dotenv import load_dotenv
 import requests
 from abc import ABC, abstractmethod
@@ -41,7 +43,6 @@ class HeadHunterAPI(AbstractAPI):
                     title=vacancy["name"],
                     link=vacancy["alternate_url"],
                     salary=vacancy.get("salary"),
-                    experience=vacancy.get("experience")
                 )
                 for vacancy in data["items"]
             ]
@@ -56,16 +57,21 @@ class SuperJobAPI(AbstractAPI):
     """
 
     def get_vacancies(self, search_query):
-        url = f"https://api.superjob.ru/vacancies/?text={search_query}"
-        response = requests.get(url)
+        headers = {
+            "X-Api-App-Id": os.getenv("API_S_JOB")
+        }
+        url = f"https://api.superjob.ru/2.0/vacancies/?keyword={search_query}"
+        response = requests.get(url, headers=headers)
         if response.status_code == 200:
             data = response.json()
             vacancies = [
                 Vacancy(
-                    title=vacancy["name"],
-                    link=vacancy["alternate_url"],
-                    salary=vacancy.get("salary"),
-                    experience=vacancy.get("experience"),
+                    title=vacancy["profession"],
+                    link=vacancy["link"],
+                    salary={
+                        "from": vacancy['payment_from'],
+                        "to": vacancy['payment_to'],
+                    },
                 )
                 for vacancy in data["objects"]
             ]
@@ -92,4 +98,3 @@ def get_vacancies(search_query, api_name="hh"):
         return SuperJobAPI().get_vacancies(search_query)
     else:
         raise ValueError(f"Неизвестный API: {api_name}")
-

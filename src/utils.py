@@ -1,8 +1,3 @@
-from typing import List
-
-from src.vacancies import Vacancy
-
-
 def sort_vacancies(vacancies):
     """
     Сортирует вакансии по зарплате.
@@ -13,7 +8,7 @@ def sort_vacancies(vacancies):
     Returns:
     - List[Dict]: Отсортированный список вакансий.
     """
-    return sorted(vacancies, key=lambda x: x.get('salary', 0))
+    return sorted(vacancies, key=lambda vacancy: (vacancy.salary["from"] + vacancy.salary["to"]) / 2)
 
 
 def get_top_vacancies(vacancies, n):
@@ -37,11 +32,12 @@ def print_vacancies(vacancies):
     Parameters:
     - vacancies (List[Dict]): Список вакансий.
     """
-    for i, vacancy in enumerate(vacancies, start=1):
-        title = vacancy.get('title', 'Название вакансии отсутствует')
-        salary = vacancy.get('salary', 'Зарплата не указана')
-        link = vacancy.get('link', 'Ссылка не указана')
-        print(f"{i}. {title} ({salary}): {link}")
+    for num_vacancy, vacancy in enumerate(vacancies, start=1):
+        title = vacancy.title if hasattr(vacancy, 'title') else 'Название вакансии отсутствует'
+        salary = getattr(vacancy, 'salary', 'Зарплата не указана')
+        link = getattr(vacancy, 'link', 'Ссылка не указана')
+
+        print(f"{num_vacancy}. {title} ({salary}): {link}")
 
 
 def filter_vacancies(vacancies, filter_words):
@@ -59,9 +55,8 @@ def filter_vacancies(vacancies, filter_words):
     filtered_vacancies = []
     for vacancy in vacancies:
         for filter_word in filter_words:
-            if filter_word in vacancy.experience:
+            if filter_word in vacancy.title.lower():
                 filtered_vacancies.append(vacancy)
                 break
 
     return filtered_vacancies
-

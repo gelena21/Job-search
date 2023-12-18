@@ -1,7 +1,7 @@
 import json
 from abc import ABC, abstractmethod
 
-from vacancies import Vacancy
+from src.vacancies import Vacancy
 
 
 class AbstractSaver(ABC):
@@ -52,8 +52,6 @@ class JSONSaver(AbstractSaver):
 
     def add_vacancy(self, vacancy):
         self.vacancies.append(vars(vacancy))
-        self._save_to_file()
-        return True
 
     def get_vacancies_by_criteria(self, criteria):
         return [
@@ -66,10 +64,10 @@ class JSONSaver(AbstractSaver):
         vacancy_data = vars(vacancy)
         if vacancy_data in self.vacancies:
             self.vacancies.remove(vacancy_data)
-            self._save_to_file()
+            self.save_to_file()
             return True
         return False
 
-    def _save_to_file(self):
-        with open(self.filename, "w") as file:
-            json.dump(self.vacancies, file)
+    def save_to_file(self):
+        with open(self.filename, "w", encoding="utf-8") as file:
+            json.dump(self.vacancies, file, indent=4, ensure_ascii=False)

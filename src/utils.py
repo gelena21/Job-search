@@ -1,21 +1,14 @@
-# utils.py
-
-from typing import List
-
-from src.vacancies import Vacancy
-
-
 def sort_vacancies(vacancies):
     """
     Сортирует вакансии по зарплате.
 
     Parameters:
-    - vacancies (List[Vacancy]): Список вакансий.
+    - vacancies (List[Dict]): Список вакансий.
 
     Returns:
-    - List[Vacancy]: Отсортированный список вакансий.
+    - List[Dict]: Отсортированный список вакансий.
     """
-    return sorted(vacancies, key=lambda x: x.salary)
+    return sorted(vacancies, key=lambda vacancy: (vacancy.salary["from"] + vacancy.salary["to"]) / 2)
 
 
 def get_top_vacancies(vacancies, n):
@@ -37,30 +30,33 @@ def print_vacancies(vacancies):
     Выводит информацию о вакансиях в консоль.
 
     Parameters:
-    - vacancies (List[Vacancy]): Список вакансий.
+    - vacancies (List[Dict]): Список вакансий.
     """
-    for i, vacancy in enumerate(vacancies, start=1):
-        print(f"{i}. {vacancy.title} ({vacancy.salary}): {vacancy.link}")
+    for num_vacancy, vacancy in enumerate(vacancies, start=1):
+        title = vacancy.title if hasattr(vacancy, 'title') else 'Название вакансии отсутствует'
+        salary = getattr(vacancy, 'salary', 'Зарплата не указана')
+        link = getattr(vacancy, 'link', 'Ссылка не указана')
+
+        print(f"{num_vacancy}. {title} ({salary}): {link}")
 
 
-def filter_vacancies(
-    vacancies: List[Vacancy], filter_words: List[str]
-) -> List[Vacancy]:
+def filter_vacancies(vacancies, filter_words):
     """
-    Фильтрует вакансии по ключевым словам.
+    Фильтрует вакансии по заданным ключевым словам.
 
     Parameters:
-    - vacancies (List[Vacancy]): Список вакансий.
-    - filter_words (List[str]): Список ключевых слов для фильтрации.
+    - vacancies (list): Список вакансий.
+    - filter_words (list): Ключевые слова.
 
     Returns:
-    - List[Vacancy]: Отфильтрованный список вакансий.
+    - list: Список отфильтрованных вакансий.
     """
-    filtered_vacancies = []
 
+    filtered_vacancies = []
     for vacancy in vacancies:
-        # Проверяем, содержатся ли все ключевые слова в описании вакансии
-        if all(word.lower() in vacancy.description.lower() for word in filter_words):
-            filtered_vacancies.append(vacancy)
+        for filter_word in filter_words:
+            if filter_word in vacancy.title.lower():
+                filtered_vacancies.append(vacancy)
+                break
 
     return filtered_vacancies

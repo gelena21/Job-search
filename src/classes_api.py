@@ -1,20 +1,26 @@
 import os
+
+from dotenv import load_dotenv
+import requests
 from abc import ABC, abstractmethod
 
-import requests
-from dotenv import load_dotenv
+from src.vacancies import Vacancy
 
 load_dotenv()
 
 
 class AbstractAPI(ABC):
+    """
+    Абстрактный класс для работы с API поиска работы.
+    """
+
     @abstractmethod
     def get_vacancies(self, search_query):
         """
-        Абстрактный метод для получения списка вакансий.
+        Получает список вакансий по поисковому запросу.
 
         Parameters:
-        - search_query (str): Поисковый запрос для запроса вакансий.
+        - search_query (str): Поисковой запрос.
 
         Returns:
         - list: Список вакансий.
@@ -23,66 +29,72 @@ class AbstractAPI(ABC):
 
 
 class HeadHunterAPI(AbstractAPI):
-    def __init__(self):
-        """
-        Конструктор класса HeadHunterAPI.
-        Устанавливает базовый URL и заголовки для запросов к API HeadHunter.
-        """
-        self.base_url = "https://api.hh.ru/vacancies"
-        self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                                     ' (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+    """
+    API поиска работы HeadHunter.
+    """
 
     def get_vacancies(self, search_query):
-        """
-        Получает список вакансий с использованием API HeadHunter.
-
-        Parameters:
-        - search_query (str): Поисковый запрос для запроса вакансий.
-
-        Returns:
-        - list: Список вакансий.
-        """
-        url = f"{self.base_url}/vacancies"
-        params = {"text": search_query}
-        response = requests.get(url, headers=self.headers, params=params)
-
+        url = f"https://api.hh.ru/vacancies?text={search_query}"
+        response = requests.get(url)
         if response.status_code == 200:
-            return response.json().get("items", [])
+            data = response.json()
+            vacancies = [
+                Vacancy(
+                    title=vacancy["name"],
+                    link=vacancy["alternate_url"],
+                    salary=vacancy.get("salary"),
+                )
+                for vacancy in data["items"]
+            ]
+            return vacancies
         else:
-            print(
-                f"Failed to retrieve vacancies from HeadHunter. Status code: {response.status_code}"
-            )
             return []
 
 
 class SuperJobAPI(AbstractAPI):
-    def __init__(self):
-        """
-        Конструктор класса SuperJobAPI.
-        Устанавливает базовый URL, API-ключ и заголовки для запросов к API SuperJob.
-        """
-        self.base_url = "https://api.superjob.ru/2.0/vacancies"
-        self.api_key = os.getenv("API_S_JOB")
-        self.headers = {"X-Api-App-Id": self.api_key}
+    """
+    API поиска работы SuperJob.
+    """
 
     def get_vacancies(self, search_query):
-        """
-        Получает список вакансий с использованием API SuperJob.
-
-        Parameters:
-        - search_query (str): Поисковый запрос для запроса вакансий.
-
-        Returns:
-        - list: Список вакансий.
-        """
-        url = f"{self.base_url}/vacancies/"
-        params = {"keywords": search_query}
-        response = requests.get(url, headers=self.headers, params=params)
-
+        headers = {
+            "X-Api-App-Id": os.getenv("API_S_JOB")
+        }
+        url = f"https://api.superjob.ru/2.0/vacancies/?keyword={search_query}"
+        response = requests.get(url, headers=headers)
         if response.status_code == 200:
-            return response.json().get("objects", [])
+            data = response.json()
+            vacancies = [
+                Vacancy(
+                    title=vacancy["profession"],
+                    link=vacancy["link"],
+                    salary={
+                        "from": vacancy['payment_from'],
+                        "to": vacancy['payment_to'],
+                    },
+                )
+                for vacancy in data["objects"]
+            ]
+            return vacancies
         else:
-            print(
-                f"Failed to retrieve vacancies from SuperJob. Status code: {response.status_code}"
-            )
             return []
+
+
+def get_vacancies(search_query, api_name="hh"):
+    """
+    Получает список вакансий по поисковому запросу.
+
+    Parameters:
+    - search_query (str): Поисковой запрос.
+    - api_name (str): Название API поиска работы.
+
+    Returns:
+    - list: Список вакансий.
+    """
+
+    if api_name == "hh":
+        return HeadHunterAPI().get_vacancies(search_query)
+    elif api_name == "superjob":
+        return SuperJobAPI().get_vacancies(search_query)
+    else:
+        raise ValueError(f"Неизвестный API: {api_name}")
